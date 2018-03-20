@@ -100,3 +100,4 @@ class LoginActivityTest {
             onView(allOf(isDescendantOfA(withId(textInputLayoutId)), isAssignableFrom(EditText::class.java)))
 
 }
+

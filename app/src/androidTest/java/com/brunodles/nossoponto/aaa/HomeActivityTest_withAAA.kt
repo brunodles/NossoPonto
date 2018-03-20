@@ -1,4 +1,4 @@
-package com.brunodles.nossoponto.withrobots
+package com.brunodles.nossoponto.aaa
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.espresso.Espresso.onView
@@ -18,37 +18,32 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class HomeActivityTest_withAAA {
+class HomeActivityTest_withRobots {
 
     @JvmField
     @Rule
     val activityTestRule = ActivityTestRule<HomeActivity>(HomeActivity::class.java, true, false)
 
-    val preferences by lazy {
-        Preferences(InstrumentationRegistry.getTargetContext())
-    }
-
-    @Before
-    fun clean() {
-        preferences.clear()
-    }
-
     @Test
     fun whenStart_withUser_shouldShowUserName() {
-        (InstrumentationRegistry.getTargetContext().applicationContext as Application).currentUsername = "Wow"
-        activityTestRule.launchActivity(null)
-
-        homeResult {
+        homeArrange {
+            cleanPreferences()
+            signInWithUser("Wow")
+            activityTestRule.launchActivity(null)
+        }
+        homeAssert {
             isUsername("Wow")
         }
     }
 
     @Test
     fun whenStart_withFinisher_shouldShowFinishButton() {
-        preferences.setFinisher(true)
-        activityTestRule.launchActivity(null)
-
-        homeResult {
+        homeArrange {
+            cleanPreferences()
+            setFinisher(true)
+            activityTestRule.launchActivity(null)
+        }
+        homeAssert {
             isFinishVisible()
         }
     }
@@ -57,23 +52,43 @@ class HomeActivityTest_withAAA {
     fun whenStart_withoutFinisher_shouldnotShowFinishButton() {
         activityTestRule.launchActivity(null)
 
-        homeResult {
+        homeAssert {
             isFinishHidden()
         }
     }
 
 }
 
-fun home(func: HomeRobot.() -> Unit) = HomeRobot().apply { func() }
-fun homeResult(func: HomeResult.() -> Unit) = HomeResult().apply { func() }
+fun homeArrange(func: HomeArrange.() -> Unit) = HomeArrange().apply(func)
+fun homeAct(func: HomeAct.() -> Unit) = HomeAct().apply(func)
+fun homeAssert(func: HomeAssert.() -> Unit) = HomeAssert().apply(func)
 
-class HomeRobot() {
+class HomeArrange() {
+
+    private val preferences by lazy {
+        Preferences(InstrumentationRegistry.getTargetContext())
+    }
+
+    fun cleanPreferences() {
+        preferences.clear()
+    }
+
+    fun signInWithUser(username: String) {
+        (InstrumentationRegistry.getTargetContext().applicationContext as Application).currentUsername = username
+    }
+
+    fun setFinisher(finisher: Boolean) {
+        preferences.setFinisher(finisher)
+    }
+}
+
+class HomeAct() {
     fun finish() {
         onView(withId(R.id.finish)).perform(ViewActions.click())
     }
 }
 
-class HomeResult {
+class HomeAssert {
     fun isUsername(username: String) {
         onView(withId(R.id.username)).check(ViewAssertions.matches(AllOf.allOf(isDisplayed(), withText(username))))
     }

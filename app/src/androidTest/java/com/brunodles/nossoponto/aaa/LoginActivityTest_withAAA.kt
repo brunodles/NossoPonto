@@ -1,4 +1,4 @@
-package com.brunodles.nossoponto.withrobots
+package com.brunodles.nossoponto.aaa
 
 import android.app.Activity
 import android.app.Instrumentation
@@ -18,24 +18,16 @@ import com.brunodles.nossoponto.LoginActivity
 import com.brunodles.nossoponto.Preferences
 import com.brunodles.nossoponto.R
 import org.hamcrest.core.AllOf.allOf
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class LoginActivityTest_withRobots {
+class LoginActivityTest_withAAA {
 
     @JvmField
     @Rule
     val activitTestRule = IntentsTestRule<LoginActivity>(LoginActivity::class.java, true, false)
-
-    val preferences by lazy { Preferences(InstrumentationRegistry.getTargetContext()) }
-
-    @Before
-    fun setup() {
-        preferences.clear()
-    }
 
     @Test
     fun atFirstStart_shouldBeClean() {
@@ -49,7 +41,7 @@ class LoginActivityTest_withRobots {
     @Test
     fun whenInputInvalidUser_shouldShowInvalidUserMessage() {
         activitTestRule.launchActivity(null)
-        login {
+        loginAct {
         } signIn {
             isInvalidUserMessageVisible()
         }
@@ -57,11 +49,11 @@ class LoginActivityTest_withRobots {
 
     @Test
     fun whenLogin_usingButton_shouldSendToHomeActivity() {
-        activitTestRule.launchActivity(null)
-        Intents.intending(IntentMatchers.hasComponent(HomeActivity::class.java.name))
-                .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
-
-        login {
+        loginArrange {
+            activitTestRule.launchActivity(null)
+            Intents.intending(IntentMatchers.hasComponent(HomeActivity::class.java.name))
+                    .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
+        } loginAct {
             username("brunodles")
             keyboardAction()
             password("mysecret")
@@ -73,11 +65,11 @@ class LoginActivityTest_withRobots {
 
     @Test
     fun whenLogin_usingKeyboard_shouldSendToHomeActivity() {
-        activitTestRule.launchActivity(null)
-        Intents.intending(IntentMatchers.hasComponent(HomeActivity::class.java.name))
-                .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
-
-        login {
+        loginArrange {
+            cleanPreferences()
+            activitTestRule.launchActivity(null)
+            mockHomeIntent()
+        } loginAct {
             username("brunodles")
             keyboardAction()
             password("senha")
@@ -90,9 +82,11 @@ class LoginActivityTest_withRobots {
 
     @Test
     fun whenStartAgain_shouldShowThePreviousUsername() {
-        preferences.setPreviousUsername("dlimaun")
-        activitTestRule.launchActivity(null)
-
+        loginArrange {
+            cleanPreferences()
+            preivousLoginWith("dlimaun")
+            activitTestRule.launchActivity(null)
+        }
         loginResult {
             isUsername("dlimaun")
             isPasswordEmpty()
@@ -101,10 +95,31 @@ class LoginActivityTest_withRobots {
 
 }
 
-fun login(func: LoginRobot.() -> Unit) = LoginRobot().apply { func() }
-fun loginResult(func: LoginResult.() -> Unit) = LoginResult().apply { func() }
+fun loginArrange(func: LoginArrange.() -> Unit) = LoginArrange().apply { func() }
+fun loginAct(func: LoginAct.() -> Unit) = LoginAct().apply { func() }
+fun loginResult(func: LoginAssert.() -> Unit) = LoginAssert().apply { func() }
 
-class LoginRobot {
+class LoginArrange {
+
+    val preferences by lazy { Preferences(InstrumentationRegistry.getTargetContext()) }
+
+    fun cleanPreferences() {
+        preferences.clear()
+    }
+
+    fun mockHomeIntent() {
+        Intents.intending(IntentMatchers.hasComponent(HomeActivity::class.java.name))
+                .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
+    }
+
+    fun preivousLoginWith(username: String) {
+        preferences.setPreviousUsername(username)
+    }
+
+    infix fun loginAct(func: LoginAct.() -> Unit) = LoginAct().apply(func)
+}
+
+class LoginAct {
 
     var lastEditText: Int? = null
 
@@ -136,13 +151,14 @@ class LoginRobot {
         }
     }
 
-    infix fun signIn(func: LoginResult.() -> Unit): LoginResult {
+    infix fun signIn(func: LoginAssert.() -> Unit): LoginAssert {
         onView(withText("SignIn")).perform(ViewActions.click())
         return loginResult(func)
     }
+
 }
 
-class LoginResult {
+class LoginAssert {
 
     fun isUsername(username: String) {
         onEditTextInsideTextInputLayout(R.id.username).check(ViewAssertions.matches(withText(username)))

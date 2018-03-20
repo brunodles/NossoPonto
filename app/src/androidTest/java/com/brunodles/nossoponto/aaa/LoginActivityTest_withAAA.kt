@@ -31,7 +31,10 @@ class LoginActivityTest_withAAA {
 
     @Test
     fun atFirstStart_shouldBeClean() {
-        activitTestRule.launchActivity(null)
+        loginArrange {
+            cleanPreferences()
+            activitTestRule.launchActivity(null)
+        }
         loginResult {
             isUsernameEmpty()
             isPasswordEmpty()
@@ -40,9 +43,14 @@ class LoginActivityTest_withAAA {
 
     @Test
     fun whenInputInvalidUser_shouldShowInvalidUserMessage() {
-        activitTestRule.launchActivity(null)
+        loginArrange {
+            cleanPreferences()
+            activitTestRule.launchActivity(null)
+        }
         loginAct {
-        } signIn {
+            signIn()
+        }
+        loginResult {
             isInvalidUserMessageVisible()
         }
     }
@@ -50,15 +58,18 @@ class LoginActivityTest_withAAA {
     @Test
     fun whenLogin_usingButton_shouldSendToHomeActivity() {
         loginArrange {
+            cleanPreferences()
             activitTestRule.launchActivity(null)
-            Intents.intending(IntentMatchers.hasComponent(HomeActivity::class.java.name))
-                    .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
-        } loginAct {
+            mockHomeIntent()
+        }
+        loginAct {
             username("brunodles")
             keyboardAction()
             password("mysecret")
             closeSoftKeyboard()
-        } signIn {
+            signIn()
+        }
+        loginResult {
             homeActivityWasCalled()
         }
     }
@@ -151,9 +162,8 @@ class LoginAct {
         }
     }
 
-    infix fun signIn(func: LoginAssert.() -> Unit): LoginAssert {
+    fun signIn() {
         onView(withText("SignIn")).perform(ViewActions.click())
-        return loginResult(func)
     }
 
 }

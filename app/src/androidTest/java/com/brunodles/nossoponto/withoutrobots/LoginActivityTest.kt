@@ -1,4 +1,4 @@
-package com.brunodles.nossoponto
+package com.brunodles.nossoponto.withoutrobots
 
 import android.app.Activity
 import android.app.Instrumentation
@@ -13,6 +13,10 @@ import android.support.test.espresso.intent.rule.IntentsTestRule
 import android.support.test.espresso.matcher.ViewMatchers.*
 import android.support.test.runner.AndroidJUnit4
 import android.widget.EditText
+import com.brunodles.nossoponto.HomeActivity
+import com.brunodles.nossoponto.LoginActivity
+import com.brunodles.nossoponto.Preferences
+import com.brunodles.nossoponto.R
 import org.hamcrest.core.AllOf.allOf
 import org.junit.Before
 import org.junit.Rule
@@ -39,9 +43,6 @@ class LoginActivityTest {
         onEditTextInsideTextInputLayout(R.id.username).check(ViewAssertions.matches(withText("")))
         onEditTextInsideTextInputLayout(R.id.password).check(ViewAssertions.matches(withText("")))
     }
-
-    private fun onEditTextInsideTextInputLayout(@IdRes textInputLayoutId: Int) =
-            onView(allOf(isDescendantOfA(withId(textInputLayoutId)), isAssignableFrom(EditText::class.java)))
 
     @Test
     fun whenInputInvalidUser_shouldShowInvalidUserMessage() {
@@ -85,7 +86,8 @@ class LoginActivityTest {
         Intents.intended(IntentMatchers.hasComponent(HomeActivity::class.java.name))
     }
 
-    @Test fun whenStartAgain_shouldShowThePreviousUsername() {
+    @Test
+    fun whenStartAgain_shouldShowThePreviousUsername() {
         preferences.setPreviousUsername("dlimaun")
 
         activitTestRule.launchActivity(null)
@@ -93,5 +95,8 @@ class LoginActivityTest {
         onEditTextInsideTextInputLayout(R.id.username).check(ViewAssertions.matches(withText("dlimaun")))
         onEditTextInsideTextInputLayout(R.id.password).check(ViewAssertions.matches(withText("")))
     }
+
+    private fun onEditTextInsideTextInputLayout(@IdRes textInputLayoutId: Int) =
+            onView(allOf(isDescendantOfA(withId(textInputLayoutId)), isAssignableFrom(EditText::class.java)))
 
 }

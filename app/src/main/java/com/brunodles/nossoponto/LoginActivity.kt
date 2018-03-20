@@ -12,6 +12,7 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         login.setOnClickListener(this::onLoginClick)
+        username.editText?.setText(Preferences(this).getPreviousUsername())
         password.editText?.setOnEditorActionListener { v, actionId, event ->
             onLoginClick(v)
             true
@@ -24,6 +25,7 @@ class LoginActivity : AppCompatActivity() {
         if (username.isNullOrBlank()) {
             Snackbar.make(root, "Invalid username", Snackbar.LENGTH_LONG).show()
         } else {
+            Preferences(this).setPreviousUsername(username!!)
             (application as Application).currentUsername = username
             startActivity(HomeActivity.newIntent(this))
         }

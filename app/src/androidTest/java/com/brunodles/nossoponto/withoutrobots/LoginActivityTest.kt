@@ -53,10 +53,12 @@ class LoginActivityTest {
 
     @Test
     fun whenLogin_usingButton_shouldSendToHomeActivity() {
+        // Act
         activitTestRule.launchActivity(null)
         Intents.intending(IntentMatchers.hasComponent(HomeActivity::class.java.name))
                 .respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
 
+        // Act
         onEditTextInsideTextInputLayout(R.id.username).perform(
                 ViewActions.typeText("brunodles"),
                 ViewActions.pressImeActionButton())
@@ -65,6 +67,7 @@ class LoginActivityTest {
                 ViewActions.closeSoftKeyboard())
         onView(withId(R.id.login)).perform(ViewActions.click())
 
+        // Assert
         Intents.intended(IntentMatchers.hasComponent(HomeActivity::class.java.name))
     }
 

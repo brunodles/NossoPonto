@@ -106,9 +106,9 @@ class LoginActivityTest_withAAA {
 
 }
 
-fun loginArrange(func: LoginArrange.() -> Unit) = LoginArrange().apply { func() }
-fun loginAct(func: LoginAct.() -> Unit) = LoginAct().apply { func() }
-fun loginResult(func: LoginAssert.() -> Unit) = LoginAssert().apply { func() }
+fun loginArrange(func: LoginArrange.() -> Unit) = LoginArrange().apply(func)
+fun loginAct(func: LoginAct.() -> Unit) = LoginAct().apply(func)
+fun loginResult(func: LoginAssert.() -> Unit) = LoginAssert().apply(func)
 
 class LoginArrange {
 

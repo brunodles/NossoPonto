@@ -35,7 +35,6 @@ class HomeActivityTest {
     @Test
     fun whenStart_withUser_shouldShowUserName() {
         (InstrumentationRegistry.getTargetContext().applicationContext as Application).currentUsername = "Wow"
-
         activityTestRule.launchActivity(null)
 
         onView(ViewMatchers.withText("Wow")).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
